@@ -23,6 +23,8 @@ module.exports = (auth, options, ready) => {
         h = {
             // message
             message: Function,
+            // N/A
+            status: Function,
             // typ
             typing: Function,
             // read_receipt
@@ -50,17 +52,21 @@ module.exports = (auth, options, ready) => {
 
 
         // Allow easy lookup of names
-        let userInfo = {};
-        function _(id, callback){
-            if (userInfo[id]){
-                return callback(userInfo[id].name)
+        let userCache = {};
+        function getUserInfo(id, callback) {
+            if (userCache[id]) {
+                return callback(userCache[id])
             }
-            api.getUserInfo(id, (err, obj)=>{
+            api.getUserInfo(id, (err, obj) => {
                 //console.log(obj)
-                callback(obj[id].name)
-                userInfo[id] = {};
-                userInfo[id].name = obj[id].name;
-                userInfo[id].thumb = obj[id].thumbsrc;
+                if (err){
+                    console.log(err);
+                }
+                userCache[id] = {};
+                userCache[id].name = obj[id].name;
+                userCache[id].id = id;
+                userCache[id].thumb = obj[id].thumbsrc;
+                callback(userCache[id])
             })
             /*api.getThreadList(0,20, (err, arr)=>{
                 arr.forEach((thread)=>{
@@ -72,65 +78,96 @@ module.exports = (auth, options, ready) => {
             })*/
         }
 
+        function updateStatus(id, statuses, timestamp) {
+            getUserInfo(id, (userInfo) => {
+                let status = -1;
+                if ((statuses == 0 && (status = false)) || (statuses == 2 && (status = true))) {
+                    // 0 means offline, 2 means online
+                    if (!userInfo.status || userInfo.status.isOnline != status) {
+                        // User Status Changed
+                        h.status({
+                            user: userInfo,
+                        }, {
+                                online: status,
+                                timestamp: timestamp
+                            })
+                    }
+                    userCache[id].status = {
+                        isOnline: status,
+                        timestamp: timestamp
+                    };
+
+                }
+            })
+        }
+
+        function getThreadInfo(threadID, callback) {
+            api.getThreadInfo(threadID, (err, threadInfo) => {
+                if (err) return callback({})
+                threadInfo.sendMessage = (msg, cb) => api.sendMessage(msg, threadID, cb)
+                threadInfo.id = threadID
+                threadInfo.sendTypingIndicator = (cb) => api.sendTypingIndicator(threadID, cb)
+                threadInfo.changeArchivedStatus = (archive, cb) => api.changeArchivedStatus(threadID, archive, cb)
+                threadInfo.changeNickname = (nick, userid, cb) => api.changeNickname(nick, userid, threadID, cb)
+                threadInfo.changeThreadColor = (color, cb) => api.changeThreadColor(color, threadID, cb)
+                threadInfo.changeThreadEmoji = (emoji, cb) => api.changeThreadEmoji(emoji, threadID, cb)
+                threadInfo.deleteThread = (cb) => api.deleteThread(threadID, cb)
+                threadInfo.getThreadHistory = (amount, timestamp, cb) => api.getThreadHistory(threadID, amount, timestamp, cb)
+                threadInfo.getThreadInfo = (cb) => api.getThreadInfo(threadID, cb)
+                threadInfo.getThreadPictures = (offset, limit, cb) => api.getThreadPictures(threadID, offset, limit, cb)
+                threadInfo.markAsRead = (cb) => api.markAsRead(threadID, cb)
+                threadInfo.muteThread = (seconds, cb) => api.muteThread(threadID, seconds, cb)
+                if (!threadInfo.isCanonical) {
+                    threadInfo.setTitle = (newTitle, cb) => api.setTitle(newTitle, threadID, cb)
+                    threadInfo.addUserToGroup = (userid, cb) => api.addUserToGroup(userid, threadID, cb)
+                    threadInfo.removeUserFromGroup = (userid, cb) => api.removeUserFromGroup(userid, threadID, cb)
+                    threadInfo.changeGroupImage = (image, cb) => api.changeGroupImage(image, threadID, cb)
+                    threadInfo.createPoll = (title, options, cb) => api.createPoll(title, threadID, options, cb)
+                    
+                }
+
+                callback(threadInfo)
+            })
+        }
         api.listen((err, $) => {
             //api.sendMessage(message.body, message.threadID);
-            //console.log($.threadID, $.type, JSON.stringify($))
+            console.log($.threadID, $.type, JSON.stringify($))
             switch ($.type) {
+                case "presence":
+                    updateStatus($.userID, $.statuses)
+                    break;
                 case "message":
-                    _($.senderID, (name)=>{
-                        h.message({
-                            name: name,
-                            id: $.senderID,
-                            thread: $.threadID,
-                            getInfo: (cb) => api.getThreadInfo($threadID, cb)
-                        }, {
-                                body: $.body,
-                                attachments: $.attachments
+                    getUserInfo($.senderID, (userInfo) => {
+                        getThreadInfo($.threadID, (threadInfo) => {
+                            h.message({
+                                user: userInfo,
+                                thread: threadInfo,
+                            }, {
+                                    id: $.messageID,
+                                    body: $.body,
+                                    attachments: $.attachments
+                                })
+                            $.attachments.forEach((attachment) => {
+                                switch (attachment.type) {
+                                    case "sticker":
+                                        h.sticker({
+                                            user: userInfo,
+                                            thread: threadInfo,
+                                        }, {
+                                                id: attachment.stickerID,
+                                                url: attachment.url,
+                                                size: {
+                                                    height: attachment.height,
+                                                    width: attachment.width
+                                                }
+                                            })
+                                        break;
+                                }
+
                             })
-                        $.attachments.forEach((attachment) => {
-                            switch (attachment.type) {
-                                case "sticker":
-                                    h.sticker({
-                                        name: name,
-                                        id: $.senderID,
-                                        thread: $.threadID,
-                                        getInfo: (cb) => api.getThreadInfo($threadID, cb)
-                                    }, {
-                                            id: attachment.stickerID,
-                                            url: attachment.url,
-                                            size: {
-                                                height: attachment.height,
-                                                width: attachment.width
-                                            }
-                                        })
-                                    break;
-                                case "sticker":
-                                    h.sticker({
-                                        name: name,
-                                        id: $.senderID,
-                                        thread: $.threadID,
-                                        getInfo: (cb) => api.getThreadInfo($threadID, cb)
-                                    }, {
-                                            body: $.body,
-                                            attachments: $.attachments
-                                        })
-                                    break;
-                                case "sticker":
-                                    h.sticker({
-                                        name: name,
-                                        id: $.senderID,
-                                        thread: $.threadID,
-                                        getInfo: (cb) => api.getThreadInfo($threadID, cb)
-                                    }, {
-                                            body: $.body,
-                                            attachments: $.attachments
-                                        })
-                                    break;
-                            }
-    
                         })
+
                     })
-                    
                     break;
                 case "typ":
 
