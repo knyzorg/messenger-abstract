@@ -1,3 +1,7 @@
+# Unstable af
+
+This repository is not stable. I would suggest not using it in a production setting but damn, don't use it AT ALL for now.
+
 # Messenger Events
 
 Messenger Events is an abstraction layer over the more popular [`facebook-chat-api`](https://github.com/Schmavery/facebook-chat-api/) and has as an objective to simplify the library and make it overall more consistent through embracing immutable Object-Oriented design.
