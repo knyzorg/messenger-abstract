@@ -123,7 +123,7 @@ module.exports = (auth, options, ready) => {
                 threadInfo.id = threadID
                 threadInfo.sendTypingIndicator = (cb) => api.sendTypingIndicator(threadID, cb)
                 threadInfo.changeArchivedStatus = (archive, cb) => api.changeArchivedStatus(threadID, archive, cb)
-                threadInfo.changeNickname = (nick, userid, cb) => api.changeNickname(nick, userid, threadID, cb)
+                threadInfo.changeNickname = (nick, userid, cb) => api.changeNickname(nick, threadID, userid, cb)
                 threadInfo.changeThreadColor = (color, cb) => api.changeThreadColor(color, threadID, cb)
                 threadInfo.changeThreadEmoji = (emoji, cb) => api.changeThreadEmoji(emoji, threadID, cb)
                 threadInfo.deleteThread = (cb) => api.deleteThread(threadID, cb)
