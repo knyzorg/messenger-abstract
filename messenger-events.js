@@ -72,6 +72,15 @@ module.exports = (auth, options, ready) => {
                 userCache[id].name = obj[id].name;
                 userCache[id].id = id;
                 userCache[id].thumb = obj[id].thumbsrc;
+                userCache[id].profile = obj[id].profileUrl;
+                userCache[id].isFriend = obj[id].isFriend;
+                userCache[id].isBirthday = obj[id].isBirthday;
+                userCache[id].gender = obj[id].gender;
+                userCache[id].sendMessage = (msg, cb)=>api.sendMessage(msg, id, cb)
+                userCache[id].addUserToGroup = (threadID, cb)=>api.addUserToGroup(id, threadID, cb)
+                userCache[id].removeUserToGroup = (threadID, cb)=>api.removeUserToGroup(id, threadID, cb)
+                userCache[id].changeBlockedStatus = (block, cb)=>api.changeBlockedStatus(id, block, cb)
+                
                 callback(userCache[id])
             })
             /*api.getThreadList(0,20, (err, arr)=>{
