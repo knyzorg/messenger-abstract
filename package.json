@@ -1,14 +1,32 @@
 {
-  "name": "fbchat",
+  "name": "messenger-events",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Messenger Events is an abstraction layer over the more popular [`facebook-chat-api`](https://github.com/Schmavery/facebook-chat-api/) and has as an objective to simplify the library and make it overall more consistent through embracing immutable Object-Oriented design.",
+  "main": "messenger-events.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Slava Knyazev",
+  "license": "GPL-2.0",
   "dependencies": {
     "facebook-chat-api": "github:knyzorg/facebook-chat-api#master"
-  }
+  },
+  "directories": {
+    "example": "examples"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/knyzorg/messenger-abstract.git"
+  },
+  "keywords": [
+    "facebook",
+    "chat",
+    "messenger",
+    "api"
+  ],
+  "bugs": {
+    "url": "https://github.com/knyzorg/messenger-abstract/issues"
+  },
+  "homepage": "https://github.com/knyzorg/messenger-abstract#readme"
 }

@@ -54,7 +54,7 @@ module.exports = (auth, options, ready) => {
         }
 
 
-        ready(true, { handlers: h, actions: a });
+        ready(true, { handlers: h, actions: a, api: api });
         api.setOptions(options)
 
 
@@ -70,13 +70,8 @@ module.exports = (auth, options, ready) => {
                     console.log(err);
                 }
                 userCache[id] = {};
-                userCache[id].name = obj[id].name;
+                userCache[id].name = obj[id];
                 userCache[id].id = id;
-                userCache[id].thumb = obj[id].thumbsrc;
-                userCache[id].profile = obj[id].profileUrl;
-                userCache[id].isFriend = obj[id].isFriend;
-                userCache[id].isBirthday = obj[id].isBirthday;
-                userCache[id].gender = obj[id].gender;
                 userCache[id].sendMessage = (msg, cb) => api.sendMessage(msg, id, cb)
                 userCache[id].addUserToGroup = (threadID=threadContextID, cb) => api.addUserToGroup(id, threadID, cb)
                 userCache[id].removeUserToGroup = (threadID=threadContextID, cb) => api.removeUserToGroup(id, threadID, cb)
