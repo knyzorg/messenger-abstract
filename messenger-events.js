@@ -16,6 +16,9 @@ const login = require("facebook-chat-api");
 */
 module.exports = (auth, options, ready) => {
 
+    function cloneObject(obj){
+        return JSON.parse(JSON.stringify(obj));
+    }
     login(auth, (err, api) => {
         if (err) return ready(false, err);
 
@@ -81,7 +84,7 @@ module.exports = (auth, options, ready) => {
                 userCache[id].removeUserToGroup = (threadID, cb)=>api.removeUserToGroup(id, threadID, cb)
                 userCache[id].changeBlockedStatus = (block, cb)=>api.changeBlockedStatus(id, block, cb)
                 
-                callback(userCache[id])
+                callback(cloneObject(userCache[id]))
             })
             /*api.getThreadList(0,20, (err, arr)=>{
                 arr.forEach((thread)=>{
@@ -99,6 +102,7 @@ module.exports = (auth, options, ready) => {
                 if ((statuses == 0 && (status = false)) || (statuses == 2 && (status = true))) {
                     // 0 means offline, 2 means online
                     if (!userInfo.status || userInfo.status.isOnline != status) {
+                        
                         // User Status Changed
                         h.status({
                             user: userInfo,
@@ -132,6 +136,8 @@ module.exports = (auth, options, ready) => {
                 threadInfo.getThreadPictures = (offset, limit, cb) => api.getThreadPictures(threadID, offset, limit, cb)
                 threadInfo.markAsRead = (cb) => api.markAsRead(threadID, cb)
                 threadInfo.muteThread = (seconds, cb) => api.muteThread(threadID, seconds, cb)
+                
+
                 if (!threadInfo.isCanonical) {
                     threadInfo.setTitle = (newTitle, cb) => api.setTitle(newTitle, threadID, cb)
                     threadInfo.addUserToGroup = (userid, cb) => api.addUserToGroup(userid, threadID, cb)
@@ -141,7 +147,18 @@ module.exports = (auth, options, ready) => {
                     
                 }
 
-                callback(threadInfo)
+                // Syntaxic sugar for participants
+                threadInfo.participants = [];
+                threadInfo.participantIDs.forEach((id)=>{
+                    getUserInfo(id, (userInfo)=>{
+                        userInfo.nickname = threadInfo.nicknames[userInfo.id]
+                        threadInfo.participants.push(userInfo);
+                        if (threadInfo.participants.length == threadInfo.participantIDs.length){
+                            callback(cloneObject(threadInfo))
+                        }
+                    })
+                })
+                
             })
         }
         api.listen((err, $) => {
@@ -157,6 +174,8 @@ module.exports = (auth, options, ready) => {
                 case "message":
                     getUserInfo($.senderID, (userInfo) => {
                         getThreadInfo($.threadID, (threadInfo) => {
+                           
+                            userInfo.nickname = threadInfo.nicknames[userInfo.id]
                             h.message({
                                 user: userInfo,
                                 thread: threadInfo,
