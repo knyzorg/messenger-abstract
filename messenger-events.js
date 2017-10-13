@@ -150,7 +150,7 @@ module.exports = (auth, options, ready) => {
                 threadInfo.participants = [];
                 threadInfo.participantIDs.forEach((id) => {
                     getUserInfo(id, (userInfo) => {
-                        userInfo.nickname = threadInfo.nicknames[userInfo.id]
+                        userInfo.nickname = threadInfo.nicknames ? threadInfo.nicknames[userInfo.id] : ""
                         threadInfo.participants.push(userInfo);
                         if (threadInfo.participants.length == threadInfo.participantIDs.length) {
                             callback(cloneObject(threadInfo))
@@ -173,7 +173,7 @@ module.exports = (auth, options, ready) => {
                 case "message":
                     getThreadInfo($.threadID, (threadInfo) => {
                         getUserInfo($.senderID, (userInfo) => {
-                            userInfo.nickname = threadInfo.nicknames[userInfo.id]
+                            userInfo.nickname = threadInfo.nicknames ? threadInfo.nicknames[userInfo.id] : ""
                             h.message({
                                 user: userInfo,
                                 thread: threadInfo,
