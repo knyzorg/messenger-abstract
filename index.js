@@ -22,10 +22,14 @@ require("./messenger-events")
         $.handlers.message = (context, message) => {
             console.log("Message sent from", context.user.name, "in thread", context.thread.name , ": ")
             console.log("\t", message.body)
+            if (message.body == "Yo") {
+                //context.thread.sendMessage("Yo");
+                message.react
+            }
         }
 
         $.handlers.sticker = (context, sticker) => {
-            console.log("Sticker sent from", context.user.name, "in thread", context.thread, ": ")
+            console.log("Sticker sent from", context.user.name, "in thread", context.thread.name, ": ")
             console.log("\tURL:", sticker.url)
         }
 

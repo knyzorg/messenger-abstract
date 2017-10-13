@@ -2,7 +2,10 @@
  * This is an abstraction layer around facebook-chat-api to
  * allow more complex use cases such as reimplementing a
  * full-fledged chat client by injecting commonly desired
- * information such as the names of the users
+ * information such as the names of the users.
+ * 
+ * The syntaxic sugar comes at the cost of phasing out
+ * certain features in the name of simplicity.
  */
 
 const login = require("facebook-chat-api");
@@ -20,33 +23,35 @@ module.exports = (auth, options, ready) => {
         let a = {};
 
         // Events to handle
+        let placeholder = ()=>0;
         h = {
             // message
-            message: Function,
+            message: placeholder,
             // N/A
-            status: Function,
+            status: placeholder,
             // typ
-            typing: Function,
+            typing: placeholder,
             // read_receipt
-            seen: Function,
+            seen: placeholder,
             // message_reaction
-            reaction: Function,
+            reaction: placeholder,
             // presence
-            status: Function,
+            status: placeholder,
             // sticker
-            sticker: Function,
+            sticker: placeholder,
             // file
-            file: Function,
+            file: placeholder,
             // photo
-            photo: Function,
+            photo: placeholder,
             // animation
-            animation: Function,
+            animation: placeholder,
             // share
-            share: Function,
+            share: placeholder,
             // video
             video: Function
         }
 
+        
         ready(true, { handlers: h, actions: a });
         api.setOptions(options)
 
@@ -62,6 +67,7 @@ module.exports = (auth, options, ready) => {
                 if (err){
                     console.log(err);
                 }
+                console.log(obj[id]);
                 userCache[id] = {};
                 userCache[id].name = obj[id].name;
                 userCache[id].id = id;
@@ -131,6 +137,9 @@ module.exports = (auth, options, ready) => {
         }
         api.listen((err, $) => {
             //api.sendMessage(message.body, message.threadID);
+            if (err){
+                return console.log(err)
+            }
             console.log($.threadID, $.type, JSON.stringify($))
             switch ($.type) {
                 case "presence":
@@ -145,7 +154,8 @@ module.exports = (auth, options, ready) => {
                             }, {
                                     id: $.messageID,
                                     body: $.body,
-                                    attachments: $.attachments
+                                    attachments: $.attachments,
+                                    react: (reaction, cb)=>api.setMessageReaction(reaction, $.messageID, cb)
                                 })
                             $.attachments.forEach((attachment) => {
                                 switch (attachment.type) {
