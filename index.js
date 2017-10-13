@@ -22,9 +22,10 @@ require("./messenger-events")
         $.handlers.message = (context, message) => {
             console.log("Message sent from", context.user.name, "in thread", context.thread.name , ": ")
             console.log("\t", message.body)
-            if (message.body == "Yo") {
+            if (message.body == "Cry") {
                 //context.thread.sendMessage("Yo");
-                message.react
+                message.react(":sad:")
+                // Options: ":love:", ":haha:", ":wow:", ":sad:", ":angry:", ":like:", ":dislike:", ""
             }
         }
 

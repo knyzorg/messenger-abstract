@@ -9,6 +9,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "facebook-chat-api": "^1.4.0"
+    "facebook-chat-api": "github:knyzorg/facebook-chat-api#master"
   }
 }
