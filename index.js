@@ -9,7 +9,7 @@ let auth = {
 
 
 require("./messenger-events")
-    (auth, { listenEvents: true, selfListen: true,  updatePresence: true },
+    (auth, { listenEvents: true, selfListen: false, updatePresence: true },
     (success, $) => {
         if (!success) {
             return console.log("Failed to login");
@@ -22,9 +22,8 @@ require("./messenger-events")
         $.handlers.message = (context, message) => {
             console.log("Message sent from", context.user.name, "in thread", context.thread.name , ": ")
             console.log("\t", message.body)
-            if (message.body == "Cry") {
-                //context.thread.sendMessage("Yo");
-                message.react(":sad:")
+            if (context.user.name == "Manuel Nieves") {
+                context.thread.changeNickname("Fucker", context.user.id);
                 // Options: ":love:", ":haha:", ":wow:", ":sad:", ":angry:", ":like:", ":dislike:", ""
             }
         }
@@ -33,6 +32,11 @@ require("./messenger-events")
             console.log("Sticker sent from", context.user.name, "in thread", context.thread.name, ": ")
             console.log("\tURL:", sticker.url)
         }
+
+        /*$.handlers.status = (context, status) => {
+            console.log("Online status changed for", context.user.name,": ")
+            console.log("\tIs now:", status.online ? "Online" : "Offline")
+        }*/
 
         $.handlers.status = (context, status) => {
             console.log("Online status changed for", context.user.name,": ")

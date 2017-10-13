@@ -15,9 +15,8 @@ const login = require("facebook-chat-api");
  * @param {requestCallback} ready Will be called when the login sequence has been completed. Callback is either (false, err) or (true, {handlers, actions}).
 */
 module.exports = (auth, options, ready) => {
-
     function cloneObject(obj){
-        return JSON.parse(JSON.stringify(obj));
+        return Object.assign({}, obj)
     }
     login(auth, (err, api) => {
         if (err) return ready(false, err);
@@ -26,7 +25,7 @@ module.exports = (auth, options, ready) => {
         let a = {};
 
         // Events to handle
-        let placeholder = ()=>0;
+        let placeholder = () => 0;
         h = {
             // message
             message: placeholder,
@@ -54,23 +53,22 @@ module.exports = (auth, options, ready) => {
             video: Function
         }
 
-        
+
         ready(true, { handlers: h, actions: a });
         api.setOptions(options)
 
 
         // Allow easy lookup of names
         let userCache = {};
-        function getUserInfo(id, callback) {
+        function getUserInfo(id, callback, threadContextID) {
             if (userCache[id]) {
                 return callback(userCache[id])
             }
             api.getUserInfo(id, (err, obj) => {
                 //console.log(obj)
-                if (err){
+                if (err) {
                     console.log(err);
                 }
-                console.log(obj[id]);
                 userCache[id] = {};
                 userCache[id].name = obj[id].name;
                 userCache[id].id = id;
@@ -79,10 +77,11 @@ module.exports = (auth, options, ready) => {
                 userCache[id].isFriend = obj[id].isFriend;
                 userCache[id].isBirthday = obj[id].isBirthday;
                 userCache[id].gender = obj[id].gender;
-                userCache[id].sendMessage = (msg, cb)=>api.sendMessage(msg, id, cb)
-                userCache[id].addUserToGroup = (threadID, cb)=>api.addUserToGroup(id, threadID, cb)
-                userCache[id].removeUserToGroup = (threadID, cb)=>api.removeUserToGroup(id, threadID, cb)
-                userCache[id].changeBlockedStatus = (block, cb)=>api.changeBlockedStatus(id, block, cb)
+                userCache[id].sendMessage = (msg, cb) => api.sendMessage(msg, id, cb)
+                userCache[id].addUserToGroup = (threadID=threadContextID, cb) => api.addUserToGroup(id, threadID, cb)
+                userCache[id].removeUserToGroup = (threadID=threadContextID, cb) => api.removeUserToGroup(id, threadID, cb)
+                userCache[id].changeBlockedStatus = (block, cb) => api.changeBlockedStatus(id, block, cb)
+                userCache[id].changeNickname = (nick, threadID=threadContextID, cb) => api.changeNickname(nick, threadID, userid, cb)
                 
                 callback(cloneObject(userCache[id]))
             })
@@ -102,7 +101,7 @@ module.exports = (auth, options, ready) => {
                 if ((statuses == 0 && (status = false)) || (statuses == 2 && (status = true))) {
                     // 0 means offline, 2 means online
                     if (!userInfo.status || userInfo.status.isOnline != status) {
-                        
+
                         // User Status Changed
                         h.status({
                             user: userInfo,
@@ -136,7 +135,7 @@ module.exports = (auth, options, ready) => {
                 threadInfo.getThreadPictures = (offset, limit, cb) => api.getThreadPictures(threadID, offset, limit, cb)
                 threadInfo.markAsRead = (cb) => api.markAsRead(threadID, cb)
                 threadInfo.muteThread = (seconds, cb) => api.muteThread(threadID, seconds, cb)
-                
+
 
                 if (!threadInfo.isCanonical) {
                     threadInfo.setTitle = (newTitle, cb) => api.setTitle(newTitle, threadID, cb)
@@ -144,26 +143,26 @@ module.exports = (auth, options, ready) => {
                     threadInfo.removeUserFromGroup = (userid, cb) => api.removeUserFromGroup(userid, threadID, cb)
                     threadInfo.changeGroupImage = (image, cb) => api.changeGroupImage(image, threadID, cb)
                     threadInfo.createPoll = (title, options, cb) => api.createPoll(title, threadID, options, cb)
-                    
+
                 }
 
                 // Syntaxic sugar for participants
                 threadInfo.participants = [];
-                threadInfo.participantIDs.forEach((id)=>{
-                    getUserInfo(id, (userInfo)=>{
+                threadInfo.participantIDs.forEach((id) => {
+                    getUserInfo(id, (userInfo) => {
                         userInfo.nickname = threadInfo.nicknames[userInfo.id]
                         threadInfo.participants.push(userInfo);
-                        if (threadInfo.participants.length == threadInfo.participantIDs.length){
+                        if (threadInfo.participants.length == threadInfo.participantIDs.length) {
                             callback(cloneObject(threadInfo))
                         }
                     })
                 })
-                
+
             })
         }
         api.listen((err, $) => {
             //api.sendMessage(message.body, message.threadID);
-            if (err){
+            if (err) {
                 return console.log(err)
             }
             console.log($.threadID, $.type, JSON.stringify($))
@@ -172,9 +171,8 @@ module.exports = (auth, options, ready) => {
                     updateStatus($.userID, $.statuses)
                     break;
                 case "message":
-                    getUserInfo($.senderID, (userInfo) => {
-                        getThreadInfo($.threadID, (threadInfo) => {
-                           
+                    getThreadInfo($.threadID, (threadInfo) => {
+                        getUserInfo($.senderID, (userInfo) => {
                             userInfo.nickname = threadInfo.nicknames[userInfo.id]
                             h.message({
                                 user: userInfo,
@@ -183,7 +181,7 @@ module.exports = (auth, options, ready) => {
                                     id: $.messageID,
                                     body: $.body,
                                     attachments: $.attachments,
-                                    react: (reaction, cb)=>api.setMessageReaction(reaction, $.messageID, cb)
+                                    react: (reaction, cb) => api.setMessageReaction(reaction, $.messageID, cb)
                                 })
                             $.attachments.forEach((attachment) => {
                                 switch (attachment.type) {
@@ -203,7 +201,7 @@ module.exports = (auth, options, ready) => {
                                 }
 
                             })
-                        })
+                        }, $.threadID)
 
                     })
                     break;
