@@ -9,7 +9,7 @@ require("messenger-events")
     if (!success) return console.log($);
 
     // handlers are defined as follows
-    $.handlers.message = (context, message) => {
+    $.onMessage((context, message) => {
         // context contains the user, and if appropriate, the thread
         // context.user:
         /**
@@ -31,5 +31,5 @@ require("messenger-events")
          * }
          */
         context.thread.sendMessage(message.body);
-    }
+    })
 })

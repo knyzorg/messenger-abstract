@@ -8,7 +8,7 @@ let auth = {
 }
 
 
-require("./messenger-events")
+require("../messenger-events")
     (auth, { listenEvents: true, selfListen: true, updatePresence: true },
     (success, $) => {
         if (!success) {
@@ -19,18 +19,18 @@ require("./messenger-events")
         // message encompasses all attachments (sticker, files, images, shares, videos, etc)
         // using those specific handlers would be pure syntaxic sugar
         // the message event also has the benefit of being "reactable" to as opposed to attachments
-        $.handlers.message = (context, message) => {
+        $.onMessage((context, message) => {
             console.log("Message sent from", context.user.name, "in thread", context.thread.name , ": ")
             console.log("\t", message.body)
-        }
+        })
 
-        $.handlers.sticker = (context, sticker) => {
+        $.onSticker((context, sticker) => {
             console.log("Sticker sent from", context.user.name, "in thread", context.thread.name, ": ")
             console.log("\tURL:", sticker.url)
-        }
+        })
 
-        $.handlers.status = (context, status) => {
+        $.onStatusChange((context, status) => {
             console.log("Online status changed for", context.user.name,": ")
             console.log("\tIs now:", status.online ? "Online" : "Offline")
-        }
+        })
     })

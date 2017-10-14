@@ -15,7 +15,7 @@ const login = require("facebook-chat-api");
  * @param {requestCallback} ready Will be called when the login sequence has been completed. Callback is either (false, err) or (true, {handlers, actions}).
 */
 module.exports = (auth, options, ready) => {
-    function cloneObject(obj){
+    function cloneObject(obj) {
         return Object.assign({}, obj)
     }
     login(auth, (err, api) => {
@@ -28,33 +28,43 @@ module.exports = (auth, options, ready) => {
         let placeholder = () => 0;
         h = {
             // message
-            message: placeholder,
-            // N/A
-            status: placeholder,
+            message: [],
             // typ
-            typing: placeholder,
+            typing: [],
             // read_receipt
-            seen: placeholder,
+            seen: [],
             // message_reaction
-            reaction: placeholder,
+            reaction: [],
             // presence
-            status: placeholder,
+            status: [],
             // sticker
-            sticker: placeholder,
+            sticker: [],
             // file
-            file: placeholder,
+            file: [],
             // photo
-            photo: placeholder,
+            photo: [],
             // animation
-            animation: placeholder,
+            animation: [],
             // share
-            share: placeholder,
+            share: [],
             // video
-            video: Function
+            video: []
         }
 
 
-        ready(true, { handlers: h, actions: a, api: api });
+        ready(true, { 
+            onMessage: (f) => h.message.push(f),
+            onStatusChange: (f) => h.status.push(f),
+            onTyping: (f) => h.typing.push(f),
+            onSeen: (f) => h.seen.push(f),
+            onReaction: (f) => h.reaction.push(f),
+            onSticker: (f) => h.sticker.push(f),
+            onFile: (f) => h.file.push(f),
+            onImage: (f) => h.photo.push(f),
+            onAnimation: (f) => h.animation.push(f),
+            onShare: (f) => h.share.push(f),
+            onVideo: (f) => h.video.push(f),
+            api: api });
         api.setOptions(options)
 
 
@@ -69,15 +79,14 @@ module.exports = (auth, options, ready) => {
                 if (err) {
                     console.log(err);
                 }
-                userCache[id] = {};
-                userCache[id].name = obj[id];
+                userCache[id] = obj[id];
                 userCache[id].id = id;
                 userCache[id].sendMessage = (msg, cb) => api.sendMessage(msg, id, cb)
-                userCache[id].addUserToGroup = (threadID=threadContextID, cb) => api.addUserToGroup(id, threadID, cb)
-                userCache[id].removeUserToGroup = (threadID=threadContextID, cb) => api.removeUserToGroup(id, threadID, cb)
+                userCache[id].addUserToGroup = (threadID = threadContextID, cb) => api.addUserToGroup(id, threadID, cb)
+                userCache[id].removeUserToGroup = (threadID = threadContextID, cb) => api.removeUserToGroup(id, threadID, cb)
                 userCache[id].changeBlockedStatus = (block, cb) => api.changeBlockedStatus(id, block, cb)
-                userCache[id].changeNickname = (nick, threadID=threadContextID, cb) => api.changeNickname(nick, threadID, userid, cb)
-                
+                userCache[id].changeNickname = (nick, threadID = threadContextID, cb) => api.changeNickname(nick, threadID, userid, cb)
+
                 callback(cloneObject(userCache[id]))
             })
             /*api.getThreadList(0,20, (err, arr)=>{
@@ -98,12 +107,12 @@ module.exports = (auth, options, ready) => {
                     if (!userInfo.status || userInfo.status.isOnline != status) {
 
                         // User Status Changed
-                        h.status({
+                        h.status.forEach((f) => f({
                             user: userInfo,
                         }, {
                                 online: status,
                                 timestamp: timestamp
-                            })
+                            }))
                     }
                     userCache[id].status = {
                         isOnline: status,
@@ -160,7 +169,7 @@ module.exports = (auth, options, ready) => {
             if (err) {
                 return console.log(err)
             }
-            console.log($.threadID, $.type, JSON.stringify($))
+            //console.log($.threadID, $.type, JSON.stringify($))
             switch ($.type) {
                 case "presence":
                     updateStatus($.userID, $.statuses)
@@ -169,7 +178,8 @@ module.exports = (auth, options, ready) => {
                     getThreadInfo($.threadID, (threadInfo) => {
                         getUserInfo($.senderID, (userInfo) => {
                             userInfo.nickname = threadInfo.nicknames ? threadInfo.nicknames[userInfo.id] : ""
-                            h.message({
+                            
+                            h.message.forEach((f) => f({
                                 user: userInfo,
                                 thread: threadInfo,
                             }, {
@@ -177,11 +187,11 @@ module.exports = (auth, options, ready) => {
                                     body: $.body,
                                     attachments: $.attachments,
                                     react: (reaction, cb) => api.setMessageReaction(reaction, $.messageID, cb)
-                                })
+                                }))
                             $.attachments.forEach((attachment) => {
                                 switch (attachment.type) {
                                     case "sticker":
-                                        h.sticker({
+                                        h.sticker.forEach((f) => f({
                                             user: userInfo,
                                             thread: threadInfo,
                                         }, {
@@ -191,7 +201,7 @@ module.exports = (auth, options, ready) => {
                                                     height: attachment.height,
                                                     width: attachment.width
                                                 }
-                                            })
+                                            }))
                                         break;
                                 }
 
