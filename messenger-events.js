@@ -73,92 +73,31 @@ module.exports = (auth, ready) => {
             legacyListener: [],
         }
 
+        function addHandler(handle, f){
+            let index = h[handle].push(f) - 1;
+            let removeHandler = () => h[handle].splice(index, 1);
+            return removeHandler;
+        }
         let collection = {
             // Triggers
-            onMessage: (f) => {
-                let index = h.message.push(f) - 1;
-                console.log("Added message handler")
-                let removeHandler = () => h.message.splice(index, 1);
-                return removeHandler;
-            },
-            onStatusChange: (f) => {
-                let index = h.status.push(f) - 1;
-                let removeHandler = () => h.status.splice(index, 1);
-                return removeHandler;
-            },
-            onTyping: (f) => {
-                let index = h.typing.push(f) - 1;
-                let removeHandler = () => h.typing.splice(index, 1);
-                return removeHandler;
-            },
-            onSeen: (f) => {
-                let index = h.seen.push(f) - 1;
-                let removeHandler = () => h.seen.splice(index, 1);
-                return removeHandler;
-            },
-            onReaction: (f) => {
-                let index = h.reaction.push(f) - 1;
-                let removeHandler = () => h.reaction.splice(index, 1);
-                return removeHandler;
-            },
-            onSticker: (f) => {
-                let index = h.sticker.push(f) - 1;
-                let removeHandler = () => h.sticker.splice(index, 1);
-                return removeHandler;
-            },
-            onFile: (f) => {
-                let index = h.file.push(f) - 1;
-                let removeHandler = () => h.file.splice(index, 1);
-                return removeHandler;
-            },
-            onImage: (f) => {
-                let index = h.photo.push(f) - 1;
-                let removeHandler = () => h.photo.splice(index, 1);
-                return removeHandler;
-            },
-            onAnimation: (f) => {
-                let index = h.animation.push(f) - 1;
-                let removeHandler = () => h.animation.splice(index, 1);
-                return removeHandler;
-            },
-            onShare: (f) => {
-                let index = h.share.push(f) - 1;
-                let removeHandler = () => h.share.splice(index, 1);
-                return removeHandler;
-            },
-            onVideo: (f) => {
-                let index = h.video.push(f) - 1;
-                let removeHandler = () => h.video.splice(index, 1);
-                return removeHandler;
-            },
-            onNicknameChange: (f) => {
-                let index = h.nick.push(f) - 1;
-                let removeHandler = () => h.nick.splice(index, 1);
-                return removeHandler;
-            },
-            onIconChange: (f) => {
-                let index = h.icon.push(f) - 1;
-                let removeHandler = () => h.icon.splice(index, 1);
-                return removeHandler;
-            },
-            onUserAdd: (f) => {
-                let index = h.add.push(f) - 1;
-                let removeHandler = () => h.add.splice(index, 1);
-                return removeHandler;
-            },
-            onUserRemove: (f) => {
-                let index = h.kick.push(f) - 1;
-                let removeHandler = () => h.kick.splice(index, 1);
-                return removeHandler;
-            },
+            onMessage: (f) => addHandler("message", f),
+            onStatusChange: (f) => addHandler("status", f),
+            onTyping: (f) => addHandler("typing", f),
+            onSeen: (f) => addHandler("seen", f),
+            onReaction: (f) => addHandler("reaction", f),
+            onSticker: (f) => addHandler("sticker", f),
+            onFile: (f) => addHandler("file", f),
+            onImage: (f) => addHandler("photo", f),
+            onAnimation: (f) => addHandler("animation", f),
+            onShare: (f) => addHandler("share", f),
+            onVideo: (f) => addHandler("video", f),
+            onNicknameChange: (f) => addHandler("nick", f),
+            onIconChange: (f) => addHandler("icon", f),
+            onUserAdd: (f) => addHandler("add", f),
+            onUserRemove: (f) => addHandler("kick", f),
 
             // Legacy
-            legacyListen: (f) => {
-                console.log("Added legacy handler")
-                let index = h.legacyListener.push(f) - 1;
-                let removeHandler = () => h.legacyListener.splice(index, 1);
-                return removeHandler;
-            },
+            legacyListen: (f) => addHandler("legacyListener", f),
 
             // Accessors
             getThread: getThreadInfo,
