@@ -9,6 +9,8 @@
  */
 
 const login = require("facebook-chat-api");
+const nf = ()=>0;
+
 /**
  * @param {Object} auth defines the `email` and `password` to login
  * @param {Object} options Options which will be directly passed to the chat library
@@ -63,24 +65,88 @@ module.exports = (auth, options, ready) => {
 
         ready(true, {
             // Triggers
-            onMessage: (f) => h.message.push(f),
-            onStatusChange: (f) => h.status.push(f),
-            onTyping: (f) => h.typing.push(f),
-            onSeen: (f) => h.seen.push(f),
-            onReaction: (f) => h.reaction.push(f),
-            onSticker: (f) => h.sticker.push(f),
-            onFile: (f) => h.file.push(f),
-            onImage: (f) => h.photo.push(f),
-            onAnimation: (f) => h.animation.push(f),
-            onShare: (f) => h.share.push(f),
-            onVideo: (f) => h.video.push(f),
-            onNicknameChange: (f) => h.nick.push(f),
-            onIconChange: (f) => h.icon.push(f),
-            onUserAdd: (f) => h.add.push(f),
-            onUserRemove: (f) => h.kick.push(f),
+            onMessage: (f) => {
+                let index = h.message.push(f)-1;
+                let removeHandler = () => h.message.splice(index, 1);
+                return removeHandler;
+            },
+            onStatusChange: (f) => (f) => {
+                let index = h.status.push(f)-1;
+                let removeHandler = () => h.status.splice(index, 1);
+                return removeHandler;
+            },
+            onTyping: (f) => (f) => {
+                let index = h.typing.push(f)-1;
+                let removeHandler = () => h.typing.splice(index, 1);
+                return removeHandler;
+            },
+            onSeen: (f) => (f) => {
+                let index = h.seen.push(f)-1;
+                let removeHandler = () => h.seen.splice(index, 1);
+                return removeHandler;
+            },
+            onReaction: (f) => (f) => {
+                let index = h.reaction.push(f)-1;
+                let removeHandler = () => h.reaction.splice(index, 1);
+                return removeHandler;
+            },
+            onSticker: (f) => (f) => {
+                let index = h.sticker.push(f)-1;
+                let removeHandler = () => h.sticker.splice(index, 1);
+                return removeHandler;
+            },
+            onFile: (f) => (f) => {
+                let index = h.file.push(f)-1;
+                let removeHandler = () => h.file.splice(index, 1);
+                return removeHandler;
+            },
+            onImage: (f) => (f) => {
+                let index = h.photo.push(f)-1;
+                let removeHandler = () => h.photo.splice(index, 1);
+                return removeHandler;
+            },
+            onAnimation: (f) => (f) => {
+                let index = h.animation.push(f)-1;
+                let removeHandler = () => h.animation.splice(index, 1);
+                return removeHandler;
+            },
+            onShare: (f) => (f) => {
+                let index = h.share.push(f)-1;
+                let removeHandler = () => h.share.splice(index, 1);
+                return removeHandler;
+            },
+            onVideo: (f) => (f) => {
+                let index = h.video.push(f)-1;
+                let removeHandler = () => h.video.splice(index, 1);
+                return removeHandler;
+            },
+            onNicknameChange: (f) => (f) => {
+                let index = h.nick.push(f)-1;
+                let removeHandler = () => h.nick.splice(index, 1);
+                return removeHandler;
+            },
+            onIconChange: (f) => (f) => {
+                let index = h.icon.push(f)-1;
+                let removeHandler = () => h.icon.splice(index, 1);
+                return removeHandler;
+            },
+            onUserAdd: (f) => (f) => {
+                let index = h.add.push(f)-1;
+                let removeHandler = () => h.add.splice(index, 1);
+                return removeHandler;
+            },
+            onUserRemove: (f) => (f) => {
+                let index = h.kick.push(f)-1;
+                let removeHandler = () => h.kick.splice(index, 1);
+                return removeHandler;
+            },
 
             // Legacy
-            legacyListen: (f) => h.legacyListener.push(f),
+            legacyListen: (f) => (f) => {
+                let index = h.legacyListener.push(f)-1;
+                let removeHandler = () => h.legacyListener.splice(index, 1);
+                return removeHandler;
+            },
 
             // Accessors
             getThread: getThreadInfo,

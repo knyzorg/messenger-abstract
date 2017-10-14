@@ -6,13 +6,14 @@ Performance is at best a consideration in this project and is sacrificed on ever
 
 **This library abstracts nearly everything you will need so you don't have to!**
 
-## Remaining Features
+# Feature Support
+
+### Incomplete Features
 
 The following are features which either feature no, or insufficient support but will have first-class support.
 
 - Abstraction for sending stickers
 - Abstraction for sending files
-- Abstraction for creating polls
 - Abstraction for sending pictures
 - Abstraction for handling received files
 - Abstraction for handling received pictures
@@ -20,7 +21,7 @@ The following are features which either feature no, or insufficient support but 
 - Thread history
 - onReaction events (Facebook does not report the actual message to which someone reacted, but just the ID. It is possible to find out the message but will require the parsing of the thread until the messsage id is found)
 
-## Unsupported Features
+### Unsupported Features
 
 The following are features which will, at best, feature second-class support and worst, not be implemented. If `facebook-chat-api` supports a feature in this list, you can still use it by using it directly. Conversely, some in this list are not supported *because* they lack support and will be implemented if it changes.
 
@@ -28,6 +29,9 @@ The following are features which will, at best, feature second-class support and
 - Calling (Reason: [Not supported by dependency in issue #472](https://github.com/Schmavery/facebook-chat-api/issues/472) )
 - `GetFriendsList()` method (Reason: [Read the response to my PR](https://github.com/Schmavery/facebook-chat-api/pull/536), if you are curious, Messenger Events is using my fork instead of the official repo until it is fixed)Cleaner Syntax
 
+## Features
+
+### Cleaner Code  
 The following is a short program to receive a message, react to it, log the user's nickname (if any) as well as his real name and send him a private message.
 
 ```js
@@ -43,8 +47,28 @@ require("messenger-events")
         })
     })
 ```
+### Supports multipler listeners
+```js
+require("messenger-events")
+    ({email: "FB_EMAIL", password: "FB_PASSWORD"},
+    (success, $) => {
+        if (!success) return console.log($);
 
-## Directly interface with `facebook-chat-api`
+        $.onMessage((context, message) => {
+            console.log("This will be called first")
+        })
+        
+        $.onMessage((context, message) => {
+            console.log("This will be called second")
+        })
+        
+        $.onMessage((context, message) => {
+            console.log("This will be called third")
+        })
+    })
+```
+
+### Directly interface with `facebook-chat-api`
 
 To permit users more familiar with `facebook-chat-api` to gradually transition to Messenger Events as well as to allow the usage of left-out features, it exposes direct access to the API in the `$.api` object.
 
@@ -60,7 +84,7 @@ require("./messenger-events")
     })
 ```
 
-When using the legacy `api` object directly, note that using `api.listen` will break this library by hijacking the listener away from Messenger Events. To listen to events directly, use `$.legacyListen()` which is functionally identical.
+When using the legacy `api` object directly, note that using `api.listen` will break this library by hijacking the listener away from Messenger Events. To listen to events directly, use `$.legacyListen()` which is functionally identical apart from allowing multiple functions to use at the same time.
 
 # Notice
 
