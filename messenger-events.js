@@ -48,11 +48,18 @@ module.exports = (auth, options, ready) => {
             // share
             share: [],
             // video
-            video: []
+            video: [],
+            // event.log:user-nickname
+            nick: [],
+            // event.log:thread-icon
+            icon: [],
+            add: [],
+            kick: [],
         }
 
 
-        ready(true, { 
+        ready(true, {
+            // Triggers
             onMessage: (f) => h.message.push(f),
             onStatusChange: (f) => h.status.push(f),
             onTyping: (f) => h.typing.push(f),
@@ -64,28 +71,50 @@ module.exports = (auth, options, ready) => {
             onAnimation: (f) => h.animation.push(f),
             onShare: (f) => h.share.push(f),
             onVideo: (f) => h.video.push(f),
-            api: api });
+            onNicknameChange: (f) => h.nick.push(f),
+            onIconChange: (f) => h.icon.push(f),
+            onUserAdd: (f) => h.add.push(f),
+            onUserRemove: (f) => h.kick.push(f),
+
+            // Accessors
+            getThread: getThreadInfo,
+            getUser: getUserInfo,
+
+            // Methods
+            logout: api.logout,
+
+            // API
+            api: api
+        });
         api.setOptions(options)
 
 
         // Allow easy lookup of names
         let userCache = {};
         function getUserInfo(id, callback, threadContextID) {
+
             if (userCache[id]) {
-                return callback(userCache[id])
+                userCache[id].sendMessage = (msg, cb) => api.sendMessage(msg, id, cb)
+                userCache[id].addUserToGroup = (threadID = threadContextID, cb) => api.addUserToGroup(id, threadID, cb)
+                userCache[id].removeUserFromGroup = (threadID = threadContextID, cb) => api.removeUserFromGroup(id, threadID, cb)
+                userCache[id].changeBlockedStatus = (block, cb) => api.changeBlockedStatus(id, block, cb)
+                userCache[id].changeNickname = (nick, threadID = threadContextID, cb) => api.changeNickname(nick, threadID, id, cb)
+
+                return callback(cloneObject(userCache[id]))
             }
             api.getUserInfo(id, (err, obj) => {
                 //console.log(obj)
                 if (err) {
                     console.log(err);
                 }
+                console.log("=======", threadContextID)
                 userCache[id] = obj[id];
                 userCache[id].id = id;
                 userCache[id].sendMessage = (msg, cb) => api.sendMessage(msg, id, cb)
                 userCache[id].addUserToGroup = (threadID = threadContextID, cb) => api.addUserToGroup(id, threadID, cb)
-                userCache[id].removeUserToGroup = (threadID = threadContextID, cb) => api.removeUserToGroup(id, threadID, cb)
+                userCache[id].removeUserFromGroup = (threadID = threadContextID, cb) => api.removeUserFromGroup(id, threadID, cb)
                 userCache[id].changeBlockedStatus = (block, cb) => api.changeBlockedStatus(id, block, cb)
-                userCache[id].changeNickname = (nick, threadID = threadContextID, cb) => api.changeNickname(nick, threadID, userid, cb)
+                userCache[id].changeNickname = (nick, threadID = threadContextID, cb) => api.changeNickname(nick, threadID, id, cb)
 
                 callback(cloneObject(userCache[id]))
             })
@@ -169,7 +198,7 @@ module.exports = (auth, options, ready) => {
             if (err) {
                 return console.log(err)
             }
-            //console.log($.threadID, $.type, JSON.stringify($))
+            console.log($.threadID, $.type, JSON.stringify($))
             switch ($.type) {
                 case "presence":
                     updateStatus($.userID, $.statuses)
@@ -178,7 +207,7 @@ module.exports = (auth, options, ready) => {
                     getThreadInfo($.threadID, (threadInfo) => {
                         getUserInfo($.senderID, (userInfo) => {
                             userInfo.nickname = threadInfo.nicknames ? threadInfo.nicknames[userInfo.id] : ""
-                            
+
                             h.message.forEach((f) => f({
                                 user: userInfo,
                                 thread: threadInfo,
@@ -211,6 +240,79 @@ module.exports = (auth, options, ready) => {
                     })
                     break;
                 case "typ":
+                    getThreadInfo($.threadID, (threadInfo) => {
+                        getUserInfo($.from, (userInfo) => {
+                            h.nick.forEach((f) => f({
+                                user: userInfo,
+                                thread: threadInfo
+                            }, {
+                                    isTyping: $.isTyping,
+                                    isMobile: $.fromMobile,
+                                }))
+                        }, $.threadID)
+                    })
+                    // {"isTyping":true,"from":"100003164670277","threadID":"1693875470645297","fromMobile":false,"userID":"100004805311217","type":"typ"}
+                    break;
+                //{ "type":"event","threadID":"100004805311217", "logMessageType":"log:user-nickname", "logMessageData":{ "participant_id":"100004805311217", "nickname":"Literally Me" },"logMessageBody":"You set your nickname to Literally Me.", "author":"100004805311217"}
+                case "event":
+                    getThreadInfo($.threadID, (threadInfo) => {
+                        switch ($.logMessageType) {
+                            case "log:user-nickname":
+                                getUserInfo($.author, (userInfoAuthor) => {
+                                    getUserInfo($.logMessageData.participant_id, (userInfoTarget) => {
+                                        h.nick.forEach((f) => f({
+                                            user: userInfoAuthor,
+                                            thread: threadInfo
+                                        }, {
+                                                user: userInfoTarget,
+                                                nickname: $.logMessageData.nickname
+                                            }))
+                                    }, $.threadID)
+                                }, $.threadID)
+                                break;
+                            case "log:thread-icon":
+                                getUserInfo($.author, (userInfo) => {
+                                    h.icon.forEach((f) => f({
+                                        user: userInfo,
+                                        thread: threadInfo
+                                    }, {
+                                            thread: threadInfo,
+                                            icon: $.logMessageData.thread_icon
+                                        }))
+                                }, $.threadID)
+                                break;
+                            case "log:unsubscribe":
+                                getUserInfo($.author, (userInfoAuthor) => {
+                                    getUserInfo($.logMessageData.leftParticipantFbId, (userInfoTarget) => {
+                                        h.kick.forEach((f) => f({
+                                            user: userInfoAuthor,
+                                            thread: threadInfo
+                                        }, {
+                                                user: userInfoTarget
+                                            }))
+                                    }, $.threadID)
+                                }, $.threadID)
+                                break;
+                            case "log:subscribe":
+                                getUserInfo($.author, (userInfoAuthor) => {
+                                    $.logMessageData.addedParticipants.forEach((participant) => {
+                                        getUserInfo(participant.userFbId, (userInfo) => {
+                                            h.add.forEach((f) => f({
+                                                user: userInfoAuthor,
+                                                thread: threadInfo
+                                            }, {
+                                                    user: userInfo
+                                                }))
+                                            console.log("=====!!!", $.threadID)
+                                        }, $.threadID)
+                                    })
+
+
+                                }, $.threadID)
+                                break;
+                        }
+                    })
+
 
                     break;
             }

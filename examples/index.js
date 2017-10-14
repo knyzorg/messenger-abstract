@@ -33,4 +33,21 @@ require("../messenger-events")
             console.log("Online status changed for", context.user.name,": ")
             console.log("\tIs now:", status.online ? "Online" : "Offline")
         })
+
+        $.onNicknameChange((context, target) => {
+            console.log(context.user.name, "has renamed in thread", context.thread.name)
+            console.log("\t", target.user.name, "is now", target.nickname)
+        })
+
+
+        $.onUserAdd((context, target) => {
+            console.log(context.user.name, "has added a participant to thread", context.thread.name)
+            console.log("\t", target.user.name, "has been added")
+            target.user.changeNickname("Newly Added User")
+        })
+
+        $.onUserRemove((context, target) => {
+            context.thread.sendMessage("I shall not permit the removal of " + target.user.name)
+            target.user.addUserToGroup();
+        })
     })
