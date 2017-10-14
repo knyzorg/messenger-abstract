@@ -1,6 +1,6 @@
 {
   "name": "messenger-events",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "Messenger Events is an abstraction layer over the more popular [`facebook-chat-api`](https://github.com/Schmavery/facebook-chat-api/) and has as an objective to simplify the library and make it overall more consistent through embracing immutable Object-Oriented design.",
   "main": "messenger-events.js",
   "scripts": {
