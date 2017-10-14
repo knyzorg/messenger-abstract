@@ -188,7 +188,7 @@ module.exports = (auth, options, ready) => {
                         if (threadInfo.participants.length == threadInfo.participantIDs.length) {
                             callback(cloneObject(threadInfo))
                         }
-                    })
+                    }, threadID)
                 })
 
             })
