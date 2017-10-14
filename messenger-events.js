@@ -55,6 +55,9 @@ module.exports = (auth, options, ready) => {
             icon: [],
             add: [],
             kick: [],
+
+            // For legacy support
+            legacyListener: [],
         }
 
 
@@ -75,6 +78,9 @@ module.exports = (auth, options, ready) => {
             onIconChange: (f) => h.icon.push(f),
             onUserAdd: (f) => h.add.push(f),
             onUserRemove: (f) => h.kick.push(f),
+
+            // Legacy
+            legacyListen: (f) => h.legacyListener.push(f),
 
             // Accessors
             getThread: getThreadInfo,
@@ -194,7 +200,7 @@ module.exports = (auth, options, ready) => {
             })
         }
         api.listen((err, $) => {
-            //api.sendMessage(message.body, message.threadID);
+            h.legacyListener.forEach((f)=>f(err,$))
             if (err) {
                 return console.log(err)
             }
@@ -242,7 +248,7 @@ module.exports = (auth, options, ready) => {
                 case "typ":
                     getThreadInfo($.threadID, (threadInfo) => {
                         getUserInfo($.from, (userInfo) => {
-                            h.nick.forEach((f) => f({
+                            h.typing.forEach((f) => f({
                                 user: userInfo,
                                 thread: threadInfo
                             }, {
