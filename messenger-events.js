@@ -69,82 +69,84 @@ module.exports = (auth, ready) => {
             // Triggers
             onMessage: (f) => {
                 let index = h.message.push(f) - 1;
+                console.log("Added message handler")
                 let removeHandler = () => h.message.splice(index, 1);
                 return removeHandler;
             },
-            onStatusChange: (f) => (f) => {
+            onStatusChange: (f) => {
                 let index = h.status.push(f) - 1;
                 let removeHandler = () => h.status.splice(index, 1);
                 return removeHandler;
             },
-            onTyping: (f) => (f) => {
+            onTyping: (f) => {
                 let index = h.typing.push(f) - 1;
                 let removeHandler = () => h.typing.splice(index, 1);
                 return removeHandler;
             },
-            onSeen: (f) => (f) => {
+            onSeen: (f) => {
                 let index = h.seen.push(f) - 1;
                 let removeHandler = () => h.seen.splice(index, 1);
                 return removeHandler;
             },
-            onReaction: (f) => (f) => {
+            onReaction: (f) => {
                 let index = h.reaction.push(f) - 1;
                 let removeHandler = () => h.reaction.splice(index, 1);
                 return removeHandler;
             },
-            onSticker: (f) => (f) => {
+            onSticker: (f) => {
                 let index = h.sticker.push(f) - 1;
                 let removeHandler = () => h.sticker.splice(index, 1);
                 return removeHandler;
             },
-            onFile: (f) => (f) => {
+            onFile: (f) => {
                 let index = h.file.push(f) - 1;
                 let removeHandler = () => h.file.splice(index, 1);
                 return removeHandler;
             },
-            onImage: (f) => (f) => {
+            onImage: (f) => {
                 let index = h.photo.push(f) - 1;
                 let removeHandler = () => h.photo.splice(index, 1);
                 return removeHandler;
             },
-            onAnimation: (f) => (f) => {
+            onAnimation: (f) => {
                 let index = h.animation.push(f) - 1;
                 let removeHandler = () => h.animation.splice(index, 1);
                 return removeHandler;
             },
-            onShare: (f) => (f) => {
+            onShare: (f) => {
                 let index = h.share.push(f) - 1;
                 let removeHandler = () => h.share.splice(index, 1);
                 return removeHandler;
             },
-            onVideo: (f) => (f) => {
+            onVideo: (f) => {
                 let index = h.video.push(f) - 1;
                 let removeHandler = () => h.video.splice(index, 1);
                 return removeHandler;
             },
-            onNicknameChange: (f) => (f) => {
+            onNicknameChange: (f) => {
                 let index = h.nick.push(f) - 1;
                 let removeHandler = () => h.nick.splice(index, 1);
                 return removeHandler;
             },
-            onIconChange: (f) => (f) => {
+            onIconChange: (f) => {
                 let index = h.icon.push(f) - 1;
                 let removeHandler = () => h.icon.splice(index, 1);
                 return removeHandler;
             },
-            onUserAdd: (f) => (f) => {
+            onUserAdd: (f) => {
                 let index = h.add.push(f) - 1;
                 let removeHandler = () => h.add.splice(index, 1);
                 return removeHandler;
             },
-            onUserRemove: (f) => (f) => {
+            onUserRemove: (f) => {
                 let index = h.kick.push(f) - 1;
                 let removeHandler = () => h.kick.splice(index, 1);
                 return removeHandler;
             },
 
             // Legacy
-            legacyListen: (f) => (f) => {
+            legacyListen: (f) => {
+                console.log("Added legacy handler")
                 let index = h.legacyListener.push(f) - 1;
                 let removeHandler = () => h.legacyListener.splice(index, 1);
                 return removeHandler;

@@ -12,12 +12,12 @@ require("../messenger-events")
     // Using the legacy API is fairly simple (provided you know how to work with it normally)
 
     // facebook-chat-api code is commented out
-
+    console.log($)
   //var stopListening = api.listen((err, event) => {
     var stopListening = $.legacyListen((err, event) => {
         // Using $.api.listen() would break everything all other event handlers
         if(err) return console.error(err);
-
+        console.log("Event happened")
         switch(event.type) {
             case "message":
                 if(event.body === '/stop') {
@@ -38,4 +38,8 @@ require("../messenger-events")
                 break;
         }
     });
+
+    $.onMessage((context, message)=>{
+        console.log("Got a message!")
+    })
 })
