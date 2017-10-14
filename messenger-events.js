@@ -260,6 +260,7 @@ module.exports = (auth, options, ready) => {
                             case "log:user-nickname":
                                 getUserInfo($.author, (userInfoAuthor) => {
                                     getUserInfo($.logMessageData.participant_id, (userInfoTarget) => {
+                                        if (!userInfoTarget) return;
                                         h.nick.forEach((f) => f({
                                             user: userInfoAuthor,
                                             thread: threadInfo
@@ -267,6 +268,7 @@ module.exports = (auth, options, ready) => {
                                                 user: userInfoTarget,
                                                 nickname: $.logMessageData.nickname
                                             }))
+                                            console.log(userInfoTarget);
                                     }, $.threadID)
                                 }, $.threadID)
                                 break;
@@ -297,6 +299,7 @@ module.exports = (auth, options, ready) => {
                                 getUserInfo($.author, (userInfoAuthor) => {
                                     $.logMessageData.addedParticipants.forEach((participant) => {
                                         getUserInfo(participant.userFbId, (userInfo) => {
+                                            if (!userInfo) return;
                                             h.add.forEach((f) => f({
                                                 user: userInfoAuthor,
                                                 thread: threadInfo
