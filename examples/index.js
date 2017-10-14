@@ -9,7 +9,7 @@ let auth = {
 
 
 require("../messenger-events")
-    (auth, { listenEvents: true, selfListen: true, updatePresence: true },
+    (auth,
     (success, $) => {
         if (!success) {
             return console.log("Failed to login");
