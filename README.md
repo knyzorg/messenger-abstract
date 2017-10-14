@@ -73,7 +73,7 @@ require("messenger-events")
 To permit users more familiar with `facebook-chat-api` to gradually transition to Messenger Events as well as to allow the usage of left-out features, it exposes direct access to the API in the `$.api` object.
 
 ```js
-require("./messenger-events")
+require("messenger-events")
     ({email: "FB_EMAIL", password: "FB_PASSWORD"},
     (success, $) => {
         if (!success) return console.log($);
@@ -81,10 +81,14 @@ require("./messenger-events")
         var yourID = "000000000000000";
         var msg = "Hey!";
         $.api.sendMessage(msg, yourID);
+  
+  		// Or alternatively,
+  		let api = $.api;
+  		api.sendMessage(msg, yourID);
     })
 ```
 
-When using the legacy `api` object directly, note that using `api.listen` will break this library by hijacking the listener away from Messenger Events. To listen to events directly, use `$.legacyListen()` which is functionally identical apart from allowing multiple functions to use at the same time.
+When using the legacy `api` object directly, note that using `api.listen()`is not the *real* `api.listen()` but instead mapped to `api.legacyListen()` while the real one is at `api.realListen()`. While they are functionally the same, you must **never** use `api.realListen()` as it will break all the abstractions. A bonus of using `api.legacyListen()`, is that it allows you to reuse it multiple times as [opposed to the real listener provided by `facebook-chat-api` (Issue #525)](https://github.com/Schmavery/facebook-chat-api/issues/525). 
 
 # Notice
 
