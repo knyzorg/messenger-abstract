@@ -11,26 +11,35 @@
 const login = require("facebook-chat-api");
 const nf = () => 0;
 
+Function.prototype.clone = function () {
+    var that = this;
+    var temp = function temporary() { return that.apply(this, arguments); };
+    for (var key in this) {
+        if (this.hasOwnProperty(key)) {
+            temp[key] = this[key];
+        }
+    }
+    return temp;
+};
+
 /**
  * @param {Object} auth defines the `email` and `password` to login
  * @param {requestCallback} ready Will be called when the login sequence has been completed. Callback is either (false, err) or (true, {handlers, actions}).
 */
 module.exports = (auth, ready) => {
 
-    
+
     const options = { listenEvents: true, selfListen: true, updatePresence: true };
     function cloneObject(obj) {
         return Object.assign({}, obj)
     }
     login(auth, (err, api) => {
-        if (err) return ready(false, err);
 
-        let h = {};
-        let a = {};
+        if (err) return ready(false, err);
 
         // Events to handle
         let placeholder = () => 0;
-        h = {
+        let h = {
             // message
             message: [],
             // typ
@@ -64,8 +73,7 @@ module.exports = (auth, ready) => {
             legacyListener: [],
         }
 
-
-        ready(true, {
+        let collection = {
             // Triggers
             onMessage: (f) => {
                 let index = h.message.push(f) - 1;
@@ -161,7 +169,12 @@ module.exports = (auth, ready) => {
 
             // API
             api: api
-        });
+        }
+
+        api.listenReal = api.listen.clone();
+        api.listen = collection.legacyListen;
+
+        ready(true, collection);
         api.setOptions(options)
 
 
@@ -269,7 +282,7 @@ module.exports = (auth, ready) => {
 
             })
         }
-        api.listen((err, $) => {
+        api.listenReal((err, $) => {
             h.legacyListener.forEach((f) => f(err, $))
             if (err) {
                 callback(false)
@@ -383,7 +396,7 @@ module.exports = (auth, ready) => {
                                             }, {
                                                     user: userInfo
                                                 }))
-                                            }, $.threadID)
+                                        }, $.threadID)
                                     })
 
 
