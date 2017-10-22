@@ -112,9 +112,9 @@ module.exports = (auth, ready) => {
 
         api.listenReal = api.listen.clone();
         api.listen = collection.legacyListen;
+        api.setOptions(options)
 
         ready(true, collection);
-        api.setOptions(options)
 
 
         // Allow easy lookup of names
